@@ -12,7 +12,7 @@ my $diamond = "~/bin/diamond-0.9.14/bin/diamond";
 ##usearch https://www.drive5.com/usearch/download.html
 my $usearch = "~/bin/usearch8.1.1861_i86linux32";
 my ($db_faa);
-
+my ($out_folder);
 
 my ( $workdir, $method, $outfile, $seqtype, $filetype, $sampleinfo, $randomsampling );
 GetOptions(
@@ -22,9 +22,14 @@ GetOptions(
   "s=s"  => \$seqtype,           ##prot, nucl
   "si=s" => \$sampleinfo,        ##information file for sequence numbers in each sample
   "rs=s" => \$randomsampling,    ##random sampling size, by default the minimum is used
-  "o=s"  => \$outfile            ##out file for functional profiles
+  "of=s"  => \$out_folder,            ##out file for functional profiles
+  "o=s"  => \$outfile,            ##out file for functional profiles
   "db_faa=s"  => \$db_faa,     ## fasta file for diamond makedb
 );
+
+## Set defaults
+$out_folder ||= ".";
+
 if ( !defined $workdir
   || !defined $method
   || !defined $filetype
@@ -43,6 +48,9 @@ $workdir=~s/\/$//;
 my (@files);
 if ( $method eq "diamond" ) {
   @files = glob("$workdir/*$filetype");
+  
+  # derive db prefix from fasta
+  (my $db_name = $db_faa) =~ s/\.(faa|fa|fasta)$//;
 
   my $dmnd_file = "$db_name.dmnd";
 
@@ -55,16 +63,26 @@ if ( $method eq "diamond" ) {
     print "Diamond DB exists. Skipping makedb.\n";
   }
 
-  my $diamond_db = "diamond makedb --in data/NCyc_100.faa --db data/NCyc_100";
-  system("$diamond_db");
   foreach my $file (@files) {
     my $out = $file;
     $out =~ s/$filetype/diamond/;
-    system("diamond blastx -k 1 -e 0.0001 -p 5 -d data/NCyc_100 -q $file -o $out")
-      if $seqtype eq "nucl";
-    system("diamond blastp -k 1 -e 0.0001 -p 5 -d data/NCyc_100 -q $file -o $out")
-      if $seqtype eq "prot";
-    system("cp $out ./");
+
+    if ( $seqtype eq "nucl" ) {
+      system("$diamond blastx -k 1 -e 0.0001 -p 5 -d $db_name -q $file -o $out") == 0
+        or die "Diamond blastx failed\n";
+    }
+
+    if ( $seqtype eq "prot" ) {
+      system("$diamond blastp -k 1 -e 0.0001 -p 5 -d $db_name -q $file -o $out") == 0
+        or die "Diamond blastp failed\n";
+    }
+
+    #system("diamond blastx -k 1 -e 0.0001 -p 5 -d data/NCyc_100 -q $file -o $out")
+    #  if $seqtype eq "nucl";
+    #system("diamond blastp -k 1 -e 0.0001 -p 5 -d data/NCyc_100 -q $file -o $out")
+    #  if $seqtype eq "prot";
+
+    system("cp $out $out_folder/");
   }
 }
 elsif ( $method eq "usearch" ) {
