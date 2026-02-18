@@ -11,6 +11,8 @@ my $formatdb = "~/bin/blast/bin/formatdb";
 my $diamond = "~/bin/diamond-0.9.14/bin/diamond";
 ##usearch https://www.drive5.com/usearch/download.html
 my $usearch = "~/bin/usearch8.1.1861_i86linux32";
+my ($db_faa);
+
 
 my ( $workdir, $method, $outfile, $seqtype, $filetype, $sampleinfo, $randomsampling );
 GetOptions(
@@ -21,6 +23,7 @@ GetOptions(
   "si=s" => \$sampleinfo,        ##information file for sequence numbers in each sample
   "rs=s" => \$randomsampling,    ##random sampling size, by default the minimum is used
   "o=s"  => \$outfile            ##out file for functional profiles
+  "db_faa=s"  => \$db_faa,     ## fasta file for diamond makedb
 );
 if ( !defined $workdir
   || !defined $method
@@ -39,16 +42,27 @@ $workdir=~s/\/$//;
 
 my (@files);
 if ( $method eq "diamond" ) {
-  die "Please specify the location of diamond!" if !-e $diamond;
   @files = glob("$workdir/*$filetype");
-  my $diamond_db = "$diamond makedb --in data/NCyc_100.faa --db data/NCyc_100";
+
+  my $dmnd_file = "$db_name.dmnd";
+
+  unless ( -e $dmnd_file ) {
+    print "Diamond DB not found. Creating $dmnd_file...\n";
+    system("$diamond makedb --in $db_faa --db $db_name") == 0
+      or die "Diamond makedb failed\n";
+  }
+  else {
+    print "Diamond DB exists. Skipping makedb.\n";
+  }
+
+  my $diamond_db = "diamond makedb --in data/NCyc_100.faa --db data/NCyc_100";
   system("$diamond_db");
   foreach my $file (@files) {
     my $out = $file;
     $out =~ s/$filetype/diamond/;
-    system("$diamond blastx -k 1 -e 0.0001 -p 5 -d data/NCyc_100 -q $file -o $out")
+    system("diamond blastx -k 1 -e 0.0001 -p 5 -d data/NCyc_100 -q $file -o $out")
       if $seqtype eq "nucl";
-    system("$diamond blastp -k 1 -e 0.0001 -p 5 -d data/NCyc_100 -q $file -o $out")
+    system("diamond blastp -k 1 -e 0.0001 -p 5 -d data/NCyc_100 -q $file -o $out")
       if $seqtype eq "prot";
     system("cp $out ./");
   }
