@@ -11,6 +11,7 @@ my $formatdb = "~/bin/blast/bin/formatdb";
 my $diamond = "diamond";
 ##usearch https://www.drive5.com/usearch/download.html
 my $usearch = "~/bin/usearch8.1.1861_i86linux32";
+my ($db_folder);
 my ($db_faa);
 my ($out_folder);
 
@@ -25,10 +26,12 @@ GetOptions(
   "of=s"  => \$out_folder,            ##out file for functional profiles
   "o=s"  => \$outfile,            ##out file for functional profiles
   "db_faa=s"  => \$db_faa,     ## fasta file for diamond makedb
+  "db_folder=s"  => \$db_folder,     ## fasta file for diamond makedb
 );
 
 ## Set defaults
 $out_folder ||= ".";
+$db_folder ||= "data/";
 
 if ( !defined $workdir
   || !defined $method
@@ -67,11 +70,18 @@ if ( $method eq "diamond" ) {
     my $out = $file;
     $out =~ s/$filetype/diamond/;
 
-    system("$diamond blastx -k 1 -e 0.0001 -p 5 -d $db_name -q $file -o $out")
-      if $seqtype eq "nucl";
+    if ( $seqtype eq "nucl" ) {
+      system("$diamond blastx -k 1 -e 0.0001 -p 5 -d $db_name -q $file -o $out");
+    }
 
-    system("$diamond blastp -k 1 -e 0.0001 -p 5 -d $db_name -q $file -o $out")
-      if $seqtype eq "prot";    
+    if ( $seqtype eq "prot" ) {
+      system("$diamond blastp -k 1 -e 0.0001 -p 5 -d $db_name -q $file -o $out");
+    }
+
+    #system("diamond blastx -k 1 -e 0.0001 -p 5 -d data/NCyc_100 -q $file -o $out")
+    #  if $seqtype eq "nucl";
+    #system("diamond blastp -k 1 -e 0.0001 -p 5 -d data/NCyc_100 -q $file -o $out")
+    #  if $seqtype eq "prot";
 
     system("cp $out $out_folder/");
   }
@@ -108,7 +118,7 @@ elsif ( $method eq "blast" ) {
 }
 
 my %id2gene;
-open( FILE, "data/id2gene.map.2019Jul" ) || die "#1\n";
+open( FILE, "$db_folder/id2gene.map.2019Jul" ) || die "#1\n";
 while (<FILE>) {
   chomp;
   my @items = split( "\t", $_ );
