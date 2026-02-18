@@ -67,18 +67,11 @@ if ( $method eq "diamond" ) {
     my $out = $file;
     $out =~ s/$filetype/diamond/;
 
-    if ( $seqtype eq "nucl" ) {
-      system("$diamond blastx -k 1 -e 0.0001 -p 5 -d $db_name -q $file -o $out");
-    }
+    system("$diamond blastx -k 1 -e 0.0001 -p 5 -d $db_name -q $file -o $out")
+      if ( $seqtype eq "nucl" );
 
-    if ( $seqtype eq "prot" ) {
-      system("$diamond blastp -k 1 -e 0.0001 -p 5 -d $db_name -q $file -o $out");
-    }
-
-    #system("diamond blastx -k 1 -e 0.0001 -p 5 -d data/NCyc_100 -q $file -o $out")
-    #  if $seqtype eq "nucl";
-    #system("diamond blastp -k 1 -e 0.0001 -p 5 -d data/NCyc_100 -q $file -o $out")
-    #  if $seqtype eq "prot";
+    system("$diamond blastp -k 1 -e 0.0001 -p 5 -d $db_name -q $file -o $out");
+      if ( $seqtype eq "prot" );    
 
     system("cp $out $out_folder/");
   }
