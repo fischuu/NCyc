@@ -70,7 +70,7 @@ if ( $method eq "diamond" ) {
     system("$diamond blastx -k 1 -e 0.0001 -p 5 -d $db_name -q $file -o $out")
       if ( $seqtype eq "nucl" );
 
-    system("$diamond blastp -k 1 -e 0.0001 -p 5 -d $db_name -q $file -o $out");
+    system("$diamond blastp -k 1 -e 0.0001 -p 5 -d $db_name -q $file -o $out")
       if ( $seqtype eq "prot" );    
 
     system("cp $out $out_folder/");
