@@ -68,13 +68,11 @@ if ( $method eq "diamond" ) {
     $out =~ s/$filetype/diamond/;
 
     if ( $seqtype eq "nucl" ) {
-      system("$diamond blastx -k 1 -e 0.0001 -p 5 -d $db_name -q $file -o $out") == 0
-        or die "Diamond blastx failed\n";
+      system("$diamond blastx -k 1 -e 0.0001 -p 5 -d $db_name -q $file -o $out");
     }
 
     if ( $seqtype eq "prot" ) {
-      system("$diamond blastp -k 1 -e 0.0001 -p 5 -d $db_name -q $file -o $out") == 0
-        or die "Diamond blastp failed\n";
+      system("$diamond blastp -k 1 -e 0.0001 -p 5 -d $db_name -q $file -o $out");
     }
 
     #system("diamond blastx -k 1 -e 0.0001 -p 5 -d data/NCyc_100 -q $file -o $out")
