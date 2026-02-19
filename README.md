@@ -1,3 +1,11 @@
+# Disclaimer
+
+This fork was used to adjust the script in a way that the perl script can be used within our metag pipeline
+
+https://github.com/fischuu/Snakebite-Holoruminant-MetaG
+
+where we need for Diamond free adjsutable paths, so the changes in this fork are rather specific on input/output paths for Diamond.
+
 # NCyc：a curated integrative database for fast and accurate metagenomic profiling of nitrogen cycling genes
 
 Qichao Tu, Lu Lin, Lei Cheng, Ye Deng, Zhili He, NCycDB: a curated integrative database for fast and accurate metagenomic profiling of nitrogen cycling genes, Bioinformatics, Volume 35, Issue 6, 15 March 2019, Pages 1040–1048, https://doi.org/10.1093/bioinformatics/bty741
